@@ -1,7 +1,9 @@
 # JLTGradientPathRenderer  
 
-Renders MKPolyline with a fancy multicoloured gradient fill similar to Nike + Running.
+Renders MKPolyline with a fancy multicoloured gradient fill similar to the Nike + Running App.
 A drop in replacement for MKPolylineRenderer, supports multiple colour stops and an optional border.  
+
+![](http://i.imgur.com/6fFwni0.png)
 
 ### Installation
 1. Add JLTGradientPathRenderer.swift to your project
