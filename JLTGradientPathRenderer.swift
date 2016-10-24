@@ -10,9 +10,9 @@
     var border: Bool = false
     var borderColor: UIColor?
     
-    private var cgColors:[CGColor] {
+    fileprivate var cgColors:[CGColor] {
         return colors.map({ (color) -> CGColor in
-            return color.CGColor
+            return color.cgColor
         })
     }
     
@@ -25,7 +25,7 @@
     }
     
     //MARK: Override methods
-    override func drawMapRect(mapRect: MKMapRect, zoomScale: MKZoomScale, inContext context: CGContext) {
+    override func draw(_ mapRect: MKMapRect, zoomScale: MKZoomScale, in context: CGContext) {
         
         /*
          Set path width relative to map zoom scale
@@ -33,12 +33,12 @@
         let baseWidth: CGFloat = self.lineWidth / zoomScale
         
         if self.border {
-            CGContextSetLineWidth(context, baseWidth * 2)
-            CGContextSetLineJoin(context, CGLineJoin.Round)
-            CGContextSetLineCap(context, CGLineCap.Round)
-            CGContextAddPath(context, self.path)
-            CGContextSetStrokeColorWithColor(context, self.borderColor?.CGColor ?? UIColor.whiteColor().CGColor)
-            CGContextStrokePath(context)
+            context.setLineWidth(baseWidth * 2)
+            context.setLineJoin(CGLineJoin.round)
+            context.setLineCap(CGLineCap.round)
+            context.addPath(self.path)
+            context.setStrokeColor(self.borderColor?.cgColor ?? UIColor.white.cgColor)
+            context.strokePath()
         }
         
         /*
@@ -47,42 +47,44 @@
         let colorspace = CGColorSpaceCreateDeviceRGB()
         let stopValues = calculateNumberOfStops()
         let locations: [CGFloat] = stopValues
-        let gradient = CGGradientCreateWithColors(colorspace, cgColors, locations)
+        let gradient = CGGradient(colorsSpace: colorspace, colors: cgColors as CFArray, locations: locations)
         
         /*
          Define path properties and add it to context
          */
-        CGContextSetLineWidth(context, baseWidth)
-        CGContextSetLineJoin(context, CGLineJoin.Round)
-        CGContextSetLineCap(context, CGLineCap.Round)
+        context.setLineWidth(baseWidth)
+        context.setLineJoin(CGLineJoin.round)
+        context.setLineCap(CGLineCap.round)
         
-        CGContextAddPath(context, self.path)
+        context.addPath(self.path)
         
         /*
          Replace path with stroked version so we can clip
          */
-        CGContextSaveGState(context);
+        context.saveGState();
         
-        CGContextReplacePathWithStrokedPath(context)
-        CGContextClip(context);
+        context.replacePathWithStrokedPath()
+        context.clip();
         
         /*
          Create bounding box around path and get top and bottom points
          */
-        let boundingBox = CGPathGetPathBoundingBox(self.path)
+        let boundingBox = self.path.boundingBoxOfPath
         let gradientStart = boundingBox.origin
         let gradientEnd   = CGPoint(x:boundingBox.maxX, y:boundingBox.maxY)
         
         /*
          Draw the gradient in the clipped context of the path
          */
-        CGContextDrawLinearGradient(context, gradient, gradientStart, gradientEnd, CGGradientDrawingOptions.DrawsBeforeStartLocation);
+        if let gradient = gradient {
+            context.drawLinearGradient(gradient, start: gradientStart, end: gradientEnd, options: CGGradientDrawingOptions.drawsBeforeStartLocation);
+        }
         
         
-        CGContextRestoreGState(context)
+        context.restoreGState()
         
         
-        super.drawMapRect(mapRect, zoomScale: zoomScale, inContext: context)
+        super.draw(mapRect, zoomScale: zoomScale, in: context)
     }
     
     /*
@@ -91,28 +93,28 @@
      (http://adrian.schoenig.me/blog/2013/02/21/drawing-multi-coloured-lines-on-an-mkmapview/ )
      */
     override func createPath() {
-        let path: CGMutablePathRef  = CGPathCreateMutable()
+        let path: CGMutablePath  = CGMutablePath()
         var pathIsEmpty: Bool = true
         
         for i in 0...self.polyline.pointCount-1 {
             
-            let point: CGPoint = pointForMapPoint(self.polyline.points()[i])
+            let point: CGPoint = self.point(for: self.polyline.points()[i])
             if pathIsEmpty {
-                CGPathMoveToPoint(path, nil, point.x, point.y)
+                path.move(to: point)
                 pathIsEmpty = false
             } else {
-                CGPathAddLineToPoint(path, nil, point.x, point.y)
+                path.addLine(to: point)
             }
         }
         self.path = path
     }
     
     //MARK: Helper Methods
-    private func calculateNumberOfStops() -> [CGFloat] {
+    fileprivate func calculateNumberOfStops() -> [CGFloat] {
         
         let stopDifference = (1 / Double(cgColors.count))
         
-        return Array(0.stride(to: 1+stopDifference, by: stopDifference))
+        return Array(stride(from: 0, to: 1+stopDifference, by: stopDifference))
             .map { (value) -> CGFloat in
                 return CGFloat(value)
         }
