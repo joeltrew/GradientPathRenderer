@@ -2,24 +2,50 @@
  
  import MapKit
  
- class JLTGradientPathRenderer: MKOverlayPathRenderer {
+ /// Draws a given polyline with a gradient fill, use in place of a MKOverlayPathRenderer
+ class GradientPathRenderer: MKOverlayPathRenderer {
     
-    var polyline : MKPolyline
-    var colors:[UIColor]
-    
-    var border: Bool = false
+    /// The polyline to render
+    var polyline: MKPolyline
+    /// The colors used to draw the gradient
+    var colors: [UIColor]
+    /// If a border should be rendered to make the line more visible
+    var showsBorder: Bool = false
+    /// The color of tne border, if showsBorder is true
     var borderColor: UIColor?
     
-    fileprivate var cgColors:[CGColor] {
+    /// Convenience to get an array of CGcolours from UIColors
+    private var cgColors: [CGColor] {
         return colors.map({ (color) -> CGColor in
             return color.cgColor
         })
     }
     
     //MARK: Initializers
+    /// Initializes a new Gradient Path Renderer from a given polyline and an array of colors
+    ///
+    /// - Parameters:
+    ///   - polyline: The polyline to render
+    ///   - colors: The colours the gardient should contain
     init(polyline: MKPolyline, colors: [UIColor]) {
         self.polyline = polyline
         self.colors = colors
+        
+        super.init(overlay: polyline)
+    }
+    
+    /// Initializes a new Gradient Path Renderer from a given polyline and an array of colors, with a border with a defined colour
+    ///
+    /// - Parameters:
+    ///   - polyline: The polyline to render
+    ///   - colors: The colours the gardient should contain
+    ///   - showsBorder: If the polyline should have a border
+    ///   - borderColor: The colour of the border
+    init(polyline: MKPolyline, colors: [UIColor], showsBorder: Bool, borderColor: UIColor) {
+        self.polyline = polyline
+        self.colors = colors
+        self.showsBorder = showsBorder
+        self.borderColor - borderColor
         
         super.init(overlay: polyline)
     }
@@ -32,7 +58,7 @@
          */
         let baseWidth: CGFloat = self.lineWidth / zoomScale
         
-        if self.border {
+        if self.showsBorder {
             context.setLineWidth(baseWidth * 2)
             context.setLineJoin(CGLineJoin.round)
             context.setLineCap(CGLineCap.round)
@@ -83,7 +109,6 @@
         
         context.restoreGState()
         
-        
         super.draw(mapRect, zoomScale: zoomScale, in: context)
     }
     
@@ -110,7 +135,7 @@
     }
     
     //MARK: Helper Methods
-    fileprivate func calculateNumberOfStops() -> [CGFloat] {
+    private func calculateNumberOfStops() -> [CGFloat] {
         
         let stopDifference = (1 / Double(cgColors.count))
         
@@ -119,7 +144,4 @@
                 return CGFloat(value)
         }
     }
-    
  }
- 
- 
