@@ -27,5 +27,5 @@ func mapView(mapView: MKMapView, rendererForOverlay overlay: MKOverlay) -> MKOve
 3. Optionally include `border` and `borderColor` variables to render a border on the polyline
 ```swift
 polylineRenderer.border = true
-polylineRenderer.borderColor = UIColor.redColor() /* defaults to white if not specified*/
+polylineRenderer.borderColor = UIColor.red /* defaults to white if not specified*/
 ```
