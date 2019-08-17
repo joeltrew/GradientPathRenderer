@@ -45,7 +45,7 @@
         self.polyline = polyline
         self.colors = colors
         self.showsBorder = showsBorder
-        self.borderColor - borderColor
+        self.borderColor = borderColor
         
         super.init(overlay: polyline)
     }
