@@ -1,4 +1,4 @@
-# GradientPathRenderer  
+# GradientPathRenderer
 
 Renders MKPolyline with a fancy multicoloured gradient fill similar to the Nike + Running App.
 A drop in replacement for MKPolylineRenderer, supports multiple colour stops and an optional border.  
@@ -17,7 +17,7 @@ func mapView(mapView: MKMapView, rendererForOverlay overlay: MKOverlay) -> MKOve
             /// Initialise a GradientPathRenderer with the colors
             let polylineRenderer = GradientPathRenderer(polyline: overlay, colors: gradientColors)
 
-        	/// set a linewidth
+            /// set a linewidth
             polylineRenderer.lineWidth = 7
             return polylineRenderer
     }

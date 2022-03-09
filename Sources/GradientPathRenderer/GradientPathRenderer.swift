@@ -1,25 +1,23 @@
  //  Created by Joel Trew on 24/04/2016.
  
- import MapKit
+import MapKit
  
  /// Draws a given polyline with a gradient fill, use in place of a MKOverlayPathRenderer
- class GradientPathRenderer: MKOverlayPathRenderer {
+ public class GradientPathRenderer: MKOverlayPathRenderer {
     
     /// The polyline to render
     var polyline: MKPolyline
     /// The colors used to draw the gradient
-    var colors: [UIColor]
+    var colors: [CGColor]
     /// If a border should be rendered to make the line more visible
     var showsBorder: Bool = false
     /// The color of tne border, if showsBorder is true
-    var borderColor: UIColor?
-    
-    /// Convenience to get an array of CGcolours from UIColors
-    private var cgColors: [CGColor] {
-        return colors.map({ (color) -> CGColor in
-            return color.cgColor
-        })
-    }
+     var borderColor: CGColor = {
+         let space = CGColorSpace(name: CGColorSpace.genericRGBLinear)!
+         let comps: [CGFloat] = [1, 1, 1, 1]
+         let color = CGColor(colorSpace: space, components: comps)!
+         return color
+     }()
     
     //MARK: Initializers
     /// Initializes a new Gradient Path Renderer from a given polyline and an array of colors
@@ -27,7 +25,7 @@
     /// - Parameters:
     ///   - polyline: The polyline to render
     ///   - colors: The colours the gardient should contain
-    init(polyline: MKPolyline, colors: [UIColor]) {
+    init(polyline: MKPolyline, colors: [CGColor]) {
         self.polyline = polyline
         self.colors = colors
         
@@ -41,7 +39,7 @@
     ///   - colors: The colours the gardient should contain
     ///   - showsBorder: If the polyline should have a border
     ///   - borderColor: The colour of the border
-    init(polyline: MKPolyline, colors: [UIColor], showsBorder: Bool, borderColor: UIColor) {
+    init(polyline: MKPolyline, colors: [CGColor], showsBorder: Bool, borderColor: CGColor) {
         self.polyline = polyline
         self.colors = colors
         self.showsBorder = showsBorder
@@ -51,7 +49,7 @@
     }
     
     //MARK: Override methods
-    override func draw(_ mapRect: MKMapRect, zoomScale: MKZoomScale, in context: CGContext) {
+     public override func draw(_ mapRect: MKMapRect, zoomScale: MKZoomScale, in context: CGContext) {
         
         /*
          Set path width relative to map zoom scale
@@ -63,7 +61,7 @@
             context.setLineJoin(CGLineJoin.round)
             context.setLineCap(CGLineCap.round)
             context.addPath(self.path)
-            context.setStrokeColor(self.borderColor?.cgColor ?? UIColor.white.cgColor)
+            context.setStrokeColor(self.borderColor)
             context.strokePath()
         }
         
@@ -73,7 +71,7 @@
         let colorspace = CGColorSpaceCreateDeviceRGB()
         let stopValues = calculateNumberOfStops()
         let locations: [CGFloat] = stopValues
-        let gradient = CGGradient(colorsSpace: colorspace, colors: cgColors as CFArray, locations: locations)
+        let gradient = CGGradient(colorsSpace: colorspace, colors: colors as CFArray, locations: locations)
         
         /*
          Define path properties and add it to context
@@ -117,7 +115,7 @@
      Thanks to Adrian Schoenig
      (http://adrian.schoenig.me/blog/2013/02/21/drawing-multi-coloured-lines-on-an-mkmapview/ )
      */
-    override func createPath() {
+     public override func createPath() {
         let path: CGMutablePath  = CGMutablePath()
         var pathIsEmpty: Bool = true
         
@@ -137,7 +135,7 @@
     //MARK: Helper Methods
     private func calculateNumberOfStops() -> [CGFloat] {
         
-        let stopDifference = (1 / Double(cgColors.count))
+        let stopDifference = (1 / Double(colors.count))
         
         return Array(stride(from: 0, to: 1+stopDifference, by: stopDifference))
             .map { (value) -> CGFloat in
@@ -145,3 +143,57 @@
         }
     }
  }
+
+#if canImport(UIKIt)
+import UIKit
+
+public extension GradientPathRenderer {
+    //MARK: Initializers
+    /// Initializes a new Gradient Path Renderer from a given polyline and an array of colors
+    ///
+    /// - Parameters:
+    ///   - polyline: The polyline to render
+    ///   - colors: The colours the gardient should contain
+    convenience init(polyline: MKPolyline, colors: [UIColor]) {
+        self.init(polyline: polyline, colors: colors.map(\.cgColor))
+    }
+    
+    /// Initializes a new Gradient Path Renderer from a given polyline and an array of colors, with a border with a defined colour
+    ///
+    /// - Parameters:
+    ///   - polyline: The polyline to render
+    ///   - colors: The colours the gardient should contain
+    ///   - showsBorder: If the polyline should have a border
+    ///   - borderColor: The colour of the border
+    convenience init(polyline: MKPolyline, colors: [UIColor], showsBorder: Bool, borderColor: UIColor) {
+        self.init(polyline: polyline, colors: colors.map(\.cgColor), showsBorder: showsBorder, borderColor: borderColor.cgColor)
+    }
+}
+#endif
+
+#if canImport(AppKit)
+import AppKit
+
+public extension GradientPathRenderer {
+    //MARK: Initializers
+    /// Initializes a new Gradient Path Renderer from a given polyline and an array of colors
+    ///
+    /// - Parameters:
+    ///   - polyline: The polyline to render
+    ///   - colors: The colours the gardient should contain
+    convenience init(polyline: MKPolyline, colors: [NSColor]) {
+        self.init(polyline: polyline, colors: colors.map(\.cgColor))
+    }
+    
+    /// Initializes a new Gradient Path Renderer from a given polyline and an array of colors, with a border with a defined colour
+    ///
+    /// - Parameters:
+    ///   - polyline: The polyline to render
+    ///   - colors: The colours the gardient should contain
+    ///   - showsBorder: If the polyline should have a border
+    ///   - borderColor: The colour of the border
+    convenience init(polyline: MKPolyline, colors: [NSColor], showsBorder: Bool, borderColor: NSColor) {
+        self.init(polyline: polyline, colors: colors.map(\.cgColor), showsBorder: showsBorder, borderColor: borderColor.cgColor)
+    }
+}
+#endif
