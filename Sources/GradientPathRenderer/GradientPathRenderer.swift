@@ -12,7 +12,7 @@ import MapKit
     /// If a border should be rendered to make the line more visible
     var showsBorder: Bool = false
     /// The color of tne border, if showsBorder is true
-     var borderColor: CGColor = {
+    var borderColor: CGColor = {
          let space = CGColorSpace(name: CGColorSpace.genericRGBLinear)!
          let comps: [CGFloat] = [1, 1, 1, 1]
          let color = CGColor(colorSpace: space, components: comps)!
@@ -25,7 +25,7 @@ import MapKit
     /// - Parameters:
     ///   - polyline: The polyline to render
     ///   - colors: The colours the gardient should contain
-    init(polyline: MKPolyline, colors: [CGColor]) {
+    public init(polyline: MKPolyline, colors: [CGColor]) {
         self.polyline = polyline
         self.colors = colors
         
@@ -39,7 +39,7 @@ import MapKit
     ///   - colors: The colours the gardient should contain
     ///   - showsBorder: If the polyline should have a border
     ///   - borderColor: The colour of the border
-    init(polyline: MKPolyline, colors: [CGColor], showsBorder: Bool, borderColor: CGColor) {
+    public init(polyline: MKPolyline, colors: [CGColor], showsBorder: Bool, borderColor: CGColor) {
         self.polyline = polyline
         self.colors = colors
         self.showsBorder = showsBorder
